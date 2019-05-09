@@ -19,6 +19,12 @@ module WebConsole
       app.middleware.insert_before ActionDispatch::DebugExceptions, Middleware
     end
 
+    initializer "web_console.template_paths" do
+      if template_paths = config.web_console.template_paths
+        Template.template_paths.unshift(*Array(template_paths))
+      end
+    end
+
     initializer "i18n.load_path" do
       config.i18n.load_path.concat(
         Dir[File.expand_path("../locales/*.yml", __FILE__)]

@@ -1,8 +1,13 @@
-# frozen_string_literal: true
-
 module WebConsole
+  # maps exception backtrace to bindings
   class ExceptionMapper
-    attr_reader :exc
+    attr_reader :exc # exception
+
+    def initialize(exception)
+      @backtrace = exception.backtrace
+      @bindings = exception.bindings
+      @exc = exception
+    end
 
     def self.follow(exc)
       mappers = [new(exc)]
@@ -20,12 +25,6 @@ module WebConsole
       end || mappers.first
     end
 
-    def initialize(exception)
-      @backtrace = exception.backtrace
-      @bindings = exception.bindings
-      @exc = exception
-    end
-
     def first
       guess_the_first_application_binding || @bindings.first
     end
@@ -36,21 +35,21 @@ module WebConsole
 
     private
 
-      def guess_binding_for_index(index)
-        file, line = @backtrace[index].to_s.split(":")
-        line = line.to_i
+    def guess_binding_for_index(index)
+      file, line = @backtrace[index].to_s.split(":")
+      line = line.to_i
 
-        @bindings.find do |binding|
-          source_location = SourceLocation.new(binding)
-          source_location.path == file && source_location.lineno == line
-        end
+      @bindings.find do |binding|
+        source_location = SourceLocation.new(binding)
+        source_location.path == file && source_location.lineno == line
       end
+    end
 
-      def guess_the_first_application_binding
-        @bindings.find do |binding|
-          source_location = SourceLocation.new(binding)
-          source_location.path.to_s.start_with?(Rails.root.to_s)
-        end
+    def guess_the_first_application_binding
+      @bindings.find do |binding|
+        source_location = SourceLocation.new(binding)
+        source_location.path.to_s.start_with?(Rails.root.to_s)
       end
+    end
   end
 end

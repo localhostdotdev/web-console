@@ -10,7 +10,9 @@ module WebConsole
 
       ActionDispatch::DebugExceptions.register_interceptor(Interceptor)
 
-      abort "web-console was initialized in #{Rails.env} environment"
+      unless Rails.env.development?
+        abort "web-console was initialized in #{Rails.env} environment"
+      end
     end
 
     initializer "web_console.insert_middleware" do |app|

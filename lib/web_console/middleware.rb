@@ -33,7 +33,7 @@ module WebConsole
 
         status, headers, body = call_app(env)
 
-        session = Session.from(Thread.current)
+        session = Session.current
 
         if session && acceptable_content_type?(headers)
           headers["X-Web-Console-Session-Id"] = session.id

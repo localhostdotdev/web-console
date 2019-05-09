@@ -2,27 +2,6 @@ module WebConsole
   class Session
     cattr_reader :inmemory_storage, default: {}
 
-    class << self
-      def find(id)
-        inmemory_storage[id]
-      end
-
-      # Create a Session from an binding or exception in a storage.
-      #
-      # The storage is expected to respond to #[]. The binding is expected in
-      # :__web_console_binding and the exception in :__web_console_exception.
-      #
-      # Can return nil, if no binding or exception have been preserved in the
-      # storage.
-      def from(storage)
-        if exc = storage[:__web_console_exception]
-          new(ExceptionMapper.follow(exc))
-        elsif binding = storage[:__web_console_binding]
-          new([[binding]])
-        end
-      end
-    end
-
     attr_reader :id
 
     def initialize(exception_mappers)
@@ -31,6 +10,18 @@ module WebConsole
       @evaluator = Evaluator.new(@current_binding = exception_mappers.first.first)
 
       store_into_memory
+    end
+
+    def self.find(id)
+      inmemory_storage[id]
+    end
+
+    def self.current
+      if exc = Thread.current[:__web_console_exception]
+        new(ExceptionMapper.follow(exc))
+      elsif binding = Thread.current[:__web_console_binding]
+        new([[binding]])
+      end
     end
 
     def eval(input)

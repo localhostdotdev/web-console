@@ -1,8 +1,4 @@
-# frozen_string_literal: true
-
-$:.push File.expand_path("../lib", __FILE__)
-
-require "web_console/version"
+require_relative "lib/web_console/version"
 
 Gem::Specification.new do |s|
   s.name     = "web-console"
@@ -13,7 +9,7 @@ Gem::Specification.new do |s|
   s.summary  = "A debugging tool for your Ruby on Rails applications."
   s.license  = "MIT"
 
-  s.files = Dir["lib/**/*", "MIT-LICENSE", "Rakefile", "README.markdown", "CHANGELOG.markdown"]
+  s.files = `git ls-files`.split("\n")
 
   s.required_ruby_version = ">= 2.5"
 

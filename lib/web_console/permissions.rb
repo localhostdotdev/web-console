@@ -1,14 +1,15 @@
-# frozen_string_literal: true
-
 require "ipaddr"
 
 module WebConsole
   class Permissions
-    # IPv4 and IPv6 localhost should be always whitelisted.
-    ALWAYS_PERMITTED_NETWORKS = %w( 127.0.0.0/8 ::1 )
+    ALWAYS_PERMITTED_NETWORKS = ['127.0.0.0/8', '::1']
 
     def initialize(networks = nil)
-      @networks = normalize_networks(networks).map(&method(:coerce_network_to_ipaddr)).uniq
+      @networks = normalize_networks(networks).map do |network|
+        coerce_network_to_ipaddr(network)
+      end
+
+      @networks.uniq!
     end
 
     def include?(network)
@@ -18,25 +19,25 @@ module WebConsole
     end
 
     def to_s
-      @networks.map(&method(:human_readable_ipaddr)).join(", ")
+      @networks.map { |network| human_readable_ipaddr(network) }.join(", ")
     end
 
     private
 
-      def normalize_networks(networks)
-        Array(networks).concat(ALWAYS_PERMITTED_NETWORKS)
-      end
+    def normalize_networks(networks)
+      Array(networks).concat(ALWAYS_PERMITTED_NETWORKS)
+    end
 
-      def coerce_network_to_ipaddr(network)
-        if network.is_a?(IPAddr)
-          network
-        else
-          IPAddr.new(network)
-        end
+    def coerce_network_to_ipaddr(network)
+      if network.is_a?(IPAddr)
+        network
+      else
+        IPAddr.new(network)
       end
+    end
 
-      def human_readable_ipaddr(ipaddr)
-        ipaddr.to_range.to_s.split("..").uniq.join("/")
-      end
+    def human_readable_ipaddr(ipaddr)
+      ipaddr.to_range.to_s.split("..").uniq.join("/")
+    end
   end
 end

@@ -1,10 +1,7 @@
-# frozen_string_literal: true
-
 module WebConsole
-  # Injects content into a Rack body.
   class Injector
     def initialize(body, headers)
-      @body = "".dup
+      @body = ""
 
       body.each { |part| @body << part }
       body.close if body.respond_to?(:close)
@@ -13,9 +10,7 @@ module WebConsole
     end
 
     def inject(content)
-      # Remove any previously set Content-Length header because we modify
-      # the body. Otherwise the response will be truncated.
-      @headers.delete("Content-Length")
+      @headers.delete("Content-Length") # because some content is added
 
       [
         if position = @body.rindex("</body>")
